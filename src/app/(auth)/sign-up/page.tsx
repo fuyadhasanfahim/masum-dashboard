@@ -2,7 +2,7 @@ import Signup from '@/components/auth/sign-up';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Sign Up - Dashboard | Masum Kamal',
+    title: 'Sign Up - Dashboard | Fuyad Hasan Fahim',
     description: 'Sign up to your account',
 };
 

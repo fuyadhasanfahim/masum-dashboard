@@ -20,7 +20,7 @@ const fontMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Dashboard | Masum Kamal',
+    title: 'Dashboard | Fuyad Hasan Fahim',
     description:
         'A personal dashboard built with Next.js, TypeScript, and Tailwind CSS. View your profile, manage your account, and explore the features of the dashboard.',
 };
