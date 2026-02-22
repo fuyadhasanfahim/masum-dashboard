@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Toaster } from 'sonner';
 import { Open_Sans, Source_Serif_4, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const fontSans = Open_Sans({
     subsets: ['latin'],
@@ -20,7 +21,7 @@ const fontMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Dashboard | Fuyad Hasan Fahim',
+    title: 'Fuyad Hasan Fahim',
     description:
         'A personal dashboard built with Next.js, TypeScript, and Tailwind CSS. View your profile, manage your account, and explore the features of the dashboard.',
 };
@@ -35,8 +36,10 @@ export default function RootLayout({
             <body
                 className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
             >
-                {children}
-                <Toaster theme="light" position="bottom-right" />
+                <TooltipProvider>
+                    {children}
+                    <Toaster theme="light" position="bottom-right" />
+                </TooltipProvider>
             </body>
         </html>
     );
