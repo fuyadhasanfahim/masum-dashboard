@@ -20,7 +20,7 @@ export default function NavNotifications() {
                     <Bell />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-full max-w-lg">
+            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-xs">
                 <DropdownMenuGroup>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuItem>Profile</DropdownMenuItem>

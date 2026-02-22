@@ -19,4 +19,5 @@ export const auth = betterAuth({
     },
     user: { modelName: 'users' },
     plugins: [admin(), jwt(), nextCookies()],
+    trustedOrigins: (process.env.TRUSTED_ORIGINS as string).split(','),
 });

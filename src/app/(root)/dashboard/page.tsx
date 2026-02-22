@@ -1,6 +1,16 @@
+import { ChartAreaInteractive } from '@/components/root/dashboard/chart-area-interactive';
+import { DataTable } from '@/components/root/dashboard/data-table';
+import { SectionCards } from '@/components/root/dashboard/section-cards';
+import data from '@/components/root/dashboard/data.json';
 import { createMetadata } from '@/lib/metadata';
 export const metadata = createMetadata('Dashboard');
 
 export default function UserProfile() {
-    return <div></div>;
+    return (
+        <div className="space-y-4 md:space-y-6">
+            <SectionCards />
+            <ChartAreaInteractive />
+            <DataTable data={data} />
+        </div>
+    );
 }

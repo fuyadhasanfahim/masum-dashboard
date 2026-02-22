@@ -12,16 +12,24 @@ import {
 import { signIn } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function Signin({
     className,
     ...props
 }: React.ComponentProps<'div'>) {
     const handleSignInWithGoogle = async () => {
-        await signIn.social({
-            provider: 'google',
-            callbackURL: '/dashboard',
-        });
+        toast.promise(
+            signIn.social({
+                provider: 'google',
+                callbackURL: '/dashboard',
+            }),
+            {
+                loading: 'Signing in with Google...',
+                success: 'Signed in with Google successfully.',
+                error: (err) => err.message || 'Failed to sign in with Google.',
+            },
+        );
     };
 
     return (

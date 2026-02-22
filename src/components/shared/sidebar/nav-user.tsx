@@ -21,10 +21,27 @@ import { Spinner } from '@/components/ui/spinner';
 import { signOut, useSession } from '@/lib/auth-client';
 import { BellDot, EllipsisVertical, LogOut, UserCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function NavUser() {
     const { data: session, isPending } = useSession();
     const { isMobile } = useSidebar();
+    const router = useRouter();
+
+    const handleSignout = async () => {
+        await signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    toast.success('You have been signed out.');
+                    router.push('/sign-in');
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message);
+                },
+            },
+        });
+    };
 
     return (
         <SidebarMenu>
@@ -126,11 +143,7 @@ export function NavUser() {
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={async () => {
-                                await signOut();
-                            }}
-                        >
+                        <DropdownMenuItem onSelect={handleSignout}>
                             <LogOut />
                             Log out
                         </DropdownMenuItem>
