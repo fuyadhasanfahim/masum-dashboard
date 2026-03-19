@@ -1,7 +1,10 @@
+import { OrdersPageContent } from '@/components/root/orders/orders-page-content';
 import { createMetadata } from '@/lib/metadata';
 
-export const metadata = createMetadata('Orders');
+export async function generateMetadata() {
+    return createMetadata('Orders');
+}
 
 export default function OrdersPage() {
-    return <div>Orders</div>;
+    return <OrdersPageContent />;
 }

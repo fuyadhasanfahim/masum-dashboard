@@ -3,7 +3,10 @@ import { DataTable } from '@/components/root/dashboard/data-table';
 import { SectionCards } from '@/components/root/dashboard/section-cards';
 import data from '@/components/root/dashboard/data.json';
 import { createMetadata } from '@/lib/metadata';
-export const metadata = createMetadata('Dashboard');
+
+export async function generateMetadata() {
+    return createMetadata('Dashboard');
+}
 
 export default function UserProfile() {
     return (

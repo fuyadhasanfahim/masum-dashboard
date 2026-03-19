@@ -13,17 +13,30 @@ export interface OrderParams {
     perPage?: number;
 }
 
+export interface CreateOrderData {
+    title?: string;
+    images?: number;
+    downloadLink?: string;
+    localFileLocation?: string;
+    perImagePrice?: number;
+    totalPrice?: number;
+    client?: string;
+    service?: string;
+}
+
 export interface OrderState {
     orders: IOrder[];
     selectedOrder: IOrder | null;
     pagination: OrderPagination | null;
     params: OrderParams;
     isLoading: boolean;
+    isCreating: boolean;
     error: string | null;
 }
 
 export interface OrderActions {
     fetchOrders: () => Promise<void>;
+    createOrder: (data: CreateOrderData) => Promise<boolean>;
     setParams: (params: OrderParams) => void;
     setSelectedOrder: (order: IOrder | null) => void;
     reset: () => void;

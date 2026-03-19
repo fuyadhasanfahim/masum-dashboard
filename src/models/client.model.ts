@@ -17,6 +17,9 @@ const clientSchema = new Schema<IClient>(
         address: {
             type: String,
         },
+        currency: {
+            type: String,
+        },
     },
     {
         timestamps: true,

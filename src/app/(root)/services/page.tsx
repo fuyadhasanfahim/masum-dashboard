@@ -1,7 +1,10 @@
-import { createMetadata } from '@/lib/metadata';
+import { ServicesPageContent } from "@/components/root/services/services-page-content";
+import { createMetadata } from "@/lib/metadata";
 
-export const metadata = createMetadata('Services');
+export async function generateMetadata() {
+    return createMetadata("Services");
+}
 
 export default function ServicesPage() {
-    return <div>Services</div>;
+    return <ServicesPageContent />;
 }

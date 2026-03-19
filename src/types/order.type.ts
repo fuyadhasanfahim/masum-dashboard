@@ -12,7 +12,7 @@ export interface IOrder {
     service?: Ref<IService>;
 
     title?: string;
-    images?: string[];
+    images?: number;
     downloadLink?: string;
     localFileLocation?: string;
 

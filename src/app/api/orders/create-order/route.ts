@@ -1,0 +1,42 @@
+import { NextRequest, NextResponse } from 'next/server';
+import OrderModel from '@/models/order.model';
+import { dbConnect } from '@/lib/db';
+import { getServerUser } from '@/services/user';
+
+export async function POST(req: NextRequest) {
+    try {
+        await dbConnect();
+        const user = await getServerUser();
+
+        const body = await req.json();
+
+        const order = await OrderModel.create({
+            user: user.id,
+            client: body.client || undefined,
+            service: body.service || undefined,
+            title: body.title || undefined,
+            images: body.images || [],
+            downloadLink: body.downloadLink || undefined,
+            localFileLocation: body.localFileLocation || undefined,
+            perImagePrice: body.perImagePrice || undefined,
+            totalPrice: body.totalPrice || undefined,
+        });
+
+        return NextResponse.json({
+            success: true,
+            data: order,
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                success: false,
+                message: 'Failed to create order',
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : 'Unknown error',
+            },
+            { status: 500 },
+        );
+    }
+}

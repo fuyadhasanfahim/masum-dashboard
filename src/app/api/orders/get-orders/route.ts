@@ -17,7 +17,6 @@ export async function GET(req: NextRequest) {
             ? {
                   $or: [
                       { title: { $regex: search, $options: 'i' } },
-                      { description: { $regex: search, $options: 'i' } },
                   ],
               }
             : {};
@@ -26,10 +25,10 @@ export async function GET(req: NextRequest) {
             OrderModel.find(filter)
                 .populate('client')
                 .populate('service')
-                .populate('user')
                 .sort({ createdAt: -1 })
                 .skip(skip)
-                .limit(perPage),
+                .limit(perPage)
+                .lean(),
             OrderModel.countDocuments(filter),
         ]);
 
@@ -45,7 +44,14 @@ export async function GET(req: NextRequest) {
         });
     } catch (error) {
         return NextResponse.json(
-            { success: false, message: 'Failed to fetch orders', error },
+            {
+                success: false,
+                message: 'Failed to fetch orders',
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : 'Unknown error',
+            },
             { status: 500 },
         );
     }

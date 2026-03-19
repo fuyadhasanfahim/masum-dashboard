@@ -11,38 +11,32 @@ const orderSchema = new Schema<IOrder>(
         client: {
             type: Schema.Types.ObjectId,
             ref: 'Client',
-            required: true,
         },
         service: {
             type: Schema.Types.ObjectId,
             ref: 'Service',
-            required: true,
         },
 
         title: {
             type: String,
         },
-        description: {
+        images: {
+            type: Number,
+        },
+        downloadLink: {
+            type: String,
+        },
+        localFileLocation: {
             type: String,
         },
 
-        quantity: {
+        perImagePrice: {
             type: Number,
-            required: true,
-        },
-        perUnitPrice: {
-            type: Number,
-            required: true,
         },
         totalPrice: {
             type: Number,
-            required: true,
         },
 
-        downloadLink: {
-            type: String,
-            required: true,
-        },
         status: {
             type: String,
             enum: ['pending', 'in_progress', 'completed', 'cancelled'],

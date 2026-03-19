@@ -26,8 +26,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             className="hover:bg-transparent justify-center"
                         >
                             <Link href="/dashboard">
-                                <span className="text-lg md:text-xl lg:text-2xl font-semibold">
-                                    Acme Inc.
+                                <span className="text-lg md:text-xl lg:text-2xl font-semibold font-mono">
+                                    Masum Kamal
                                 </span>
                             </Link>
                         </SidebarMenuButton>

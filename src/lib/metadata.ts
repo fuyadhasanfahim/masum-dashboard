@@ -1,20 +1,27 @@
 import { getServerUser } from '@/services/user';
 import { Metadata } from 'next';
 
-const user = await getServerUser();
+const defaultName = 'Dashboard';
 
 export const config = {
-    name: user.name || 'Fuyad Hasan Fahim',
     url: process.env.NEXT_PUBLIC_APP_URL!,
     description:
         'A personal dashboard built with Next.js, TypeScript, and Tailwind CSS. View your profile, manage your account, and explore the features of the dashboard.',
 };
 
-export function createMetadata(
+export async function createMetadata(
     pageTitle: string,
     pageDescription?: string,
-): Metadata {
-    const title = `${pageTitle} | ${config.name}`;
+): Promise<Metadata> {
+    let name = defaultName;
+    try {
+        const user = await getServerUser();
+        name = user.name || defaultName;
+    } catch {
+        // fallback to default name if not authenticated
+    }
+
+    const title = `${pageTitle} | ${name}`;
     const description = pageDescription || config.description;
 
     return {
@@ -25,7 +32,7 @@ export function createMetadata(
             description,
             url: config.url,
             type: 'website',
-            siteName: config.name,
+            siteName: name,
         },
     };
 }

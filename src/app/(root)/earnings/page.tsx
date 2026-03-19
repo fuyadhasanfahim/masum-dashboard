@@ -1,6 +1,8 @@
 import { createMetadata } from '@/lib/metadata';
 
-export const metadata = createMetadata('Earnings');
+export async function generateMetadata() {
+    return createMetadata('Earnings');
+}
 
 export default function EarningsPage() {
     return <div>Earnings</div>;
