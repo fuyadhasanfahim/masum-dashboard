@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { IClient } from "@/types/client.type";
@@ -58,6 +58,7 @@ function formatDate(date: Date) {
     year: "numeric",
   });
 }
+import useClientStore from "@/store/client/client.store";
 
 interface EditFormValues {
   name: string;
@@ -68,12 +69,11 @@ interface EditFormValues {
 }
 
 export function ClientsPageContent() {
-  const [clients, setClients] = useState<IClient[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { clients, isLoading, fetchClients } = useClientStore();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  
+
   const pageCount = Math.max(1, Math.ceil(clients.length / pageSize));
   const paginatedData = clients.slice(
       pageIndex * pageSize,
@@ -81,27 +81,12 @@ export function ClientsPageContent() {
   );
   const canPreviousPage = pageIndex > 0;
   const canNextPage = pageIndex < pageCount - 1;
+
   const [editClient, setEditClient] = useState<IClient | null>(null);
   const [deleteClient, setDeleteClient] = useState<IClient | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const { register, handleSubmit, reset } = useForm<EditFormValues>();
-
-  const fetchClients = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/clients/get-clients");
-      const data = await res.json();
-      if (data.success) {
-        setClients(data.data);
-        setPageIndex(0);
-      }
-    } catch {
-      // silent
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchClients();
@@ -166,7 +151,7 @@ export function ClientsPageContent() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
-        <CreateClientDialog onCreated={fetchClients} />
+        <CreateClientDialog />
       </div>
 
       <div className="overflow-hidden rounded-lg border">

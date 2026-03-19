@@ -19,7 +19,7 @@ export async function PUT(req: NextRequest) {
         const earning = await EarningModel.findOneAndUpdate(
             { client: clientId, month, year },
             { status },
-            { upsert: true, new: true },
+            { upsert: true, returnDocument: 'after' },
         ).lean();
 
         return NextResponse.json({ success: true, data: earning });

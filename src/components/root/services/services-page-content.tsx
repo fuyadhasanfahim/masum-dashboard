@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { IService } from "@/types/service.type";
@@ -64,10 +64,10 @@ interface EditFormValues {
   name: string;
   description: string;
 }
+import useServiceStore from "@/store/service/service.store";
 
 export function ServicesPageContent() {
-  const [services, setServices] = useState<IService[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { services, isLoading, fetchServices } = useServiceStore();
   
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -84,22 +84,6 @@ export function ServicesPageContent() {
   const [isSaving, setIsSaving] = useState(false);
 
   const { register, handleSubmit, reset } = useForm<EditFormValues>();
-
-  const fetchServices = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/services/get-services");
-      const data = await res.json();
-      if (data.success) {
-        setServices(data.data);
-        setPageIndex(0);
-      }
-    } catch {
-      // silent
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchServices();
@@ -158,7 +142,7 @@ export function ServicesPageContent() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">Services</h1>
-        <CreateServiceDialog onCreated={fetchServices} />
+        <CreateServiceDialog />
       </div>
 
       <div className="overflow-hidden rounded-lg border">

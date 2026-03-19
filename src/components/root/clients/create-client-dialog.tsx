@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
+import useClientStore from "@/store/client/client.store";
 
 interface FormValues {
   name: string;
@@ -25,13 +26,9 @@ interface FormValues {
   currency: string;
 }
 
-interface CreateClientDialogProps {
-  onCreated: () => void;
-}
-
-export function CreateClientDialog({ onCreated }: CreateClientDialogProps) {
+export function CreateClientDialog() {
   const [open, setOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const { createClient, isCreating } = useClientStore();
 
   const { register, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
@@ -49,35 +46,20 @@ export function CreateClientDialog({ onCreated }: CreateClientDialogProps) {
       return;
     }
 
-    setIsCreating(true);
-    try {
-      const res = await fetch("/api/clients/create-client", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || undefined,
-          address: data.address || undefined,
-          currency: data.currency || undefined,
-        }),
-      });
+    const success = await createClient({
+      name: data.name,
+      email: data.email,
+      phone: data.phone || undefined,
+      address: data.address || undefined,
+      currency: data.currency || undefined,
+    });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create client");
-      }
-
+    if (success) {
       toast.success("Client created successfully");
       reset();
       setOpen(false);
-      onCreated();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create client"
-      );
-    } finally {
-      setIsCreating(false);
+    } else {
+      toast.error("Failed to create client");
     }
   };
 

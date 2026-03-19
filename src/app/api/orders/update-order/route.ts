@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
         }
 
         const order = await OrderModel.findByIdAndUpdate(id, updateData, {
-            new: true,
+            returnDocument: 'after',
         })
             .populate('client')
             .populate('service')

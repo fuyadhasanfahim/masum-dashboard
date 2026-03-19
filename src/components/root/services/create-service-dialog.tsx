@@ -17,19 +17,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
+import useServiceStore from "@/store/service/service.store";
 
 interface FormValues {
   name: string;
   description: string;
 }
 
-interface CreateServiceDialogProps {
-  onCreated: () => void;
-}
-
-export function CreateServiceDialog({ onCreated }: CreateServiceDialogProps) {
+export function CreateServiceDialog() {
   const [open, setOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const { createService, isCreating } = useServiceStore();
 
   const { register, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
@@ -44,32 +41,17 @@ export function CreateServiceDialog({ onCreated }: CreateServiceDialogProps) {
       return;
     }
 
-    setIsCreating(true);
-    try {
-      const res = await fetch("/api/services/create-service", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.name,
-          description: data.description || undefined,
-        }),
-      });
+    const success = await createService({
+      name: data.name,
+      description: data.description || undefined,
+    });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.message || "Failed to create service");
-      }
-
+    if (success) {
       toast.success("Service created successfully");
       reset();
       setOpen(false);
-      onCreated();
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create service"
-      );
-    } finally {
-      setIsCreating(false);
+    } else {
+      toast.error("Failed to create service");
     }
   };
 

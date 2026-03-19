@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import useEarningStore from "@/store/earning/earning.store";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { IEarningAggregated } from "@/types/earning.type";
@@ -88,8 +89,7 @@ interface InvoiceOrder {
 }
 
 export function EarningsPageContent() {
-  const [earnings, setEarnings] = useState<IEarningAggregated[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { earnings, isLoading, fetchEarnings } = useEarningStore();
   
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -114,22 +114,6 @@ export function EarningsPageContent() {
   const [invoiceEarning, setInvoiceEarning] = useState<IEarningAggregated | null>(null);
   const [invoiceOrders, setInvoiceOrders] = useState<InvoiceOrder[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
-
-  const fetchEarnings = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/earnings/get-earnings");
-      const data = await res.json();
-      if (data.success) {
-        setEarnings(data.data);
-        setPageIndex(0);
-      }
-    } catch {
-      toast.error("Failed to load earnings");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchEarnings();

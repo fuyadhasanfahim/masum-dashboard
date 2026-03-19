@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
         }
 
         const service = await ServiceModel.findByIdAndUpdate(id, updateData, {
-            new: true,
+            returnDocument: 'after',
         }).lean();
 
         if (!service) {

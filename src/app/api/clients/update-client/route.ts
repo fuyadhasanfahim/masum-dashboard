@@ -17,7 +17,7 @@ export async function PUT(req: NextRequest) {
         }
 
         const client = await ClientModel.findByIdAndUpdate(id, updateData, {
-            new: true,
+            returnDocument: 'after',
         }).lean();
 
         if (!client) {

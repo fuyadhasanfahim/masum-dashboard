@@ -57,6 +57,7 @@ import {
   FolderOpen,
   Pencil,
   Trash2,
+  RefreshCw,
 } from "lucide-react";
 
 const statusVariants: Record<
@@ -140,6 +141,8 @@ export function OrdersTable() {
   const [isSaving, setIsSaving] = useState(false);
   const [clients, setClients] = useState<IClient[]>([]);
   const [services, setServices] = useState<IService[]>([]);
+  const [statusOrder, setStatusOrder] = useState<IOrder | null>(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [lastPriceEdited, setLastPriceEdited] = useState<
     "perImage" | "total" | null
   >(null);
@@ -271,6 +274,31 @@ export function OrdersTable() {
     }
   };
 
+  const onStatusSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!statusOrder) return;
+    
+    const formData = new FormData(e.currentTarget);
+    const newStatus = formData.get("status") as string;
+    
+    setIsUpdatingStatus(true);
+    try {
+      const res = await fetch("/api/orders/update-order", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: statusOrder._id, status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      toast.success("Order status updated");
+      setStatusOrder(null);
+      fetchOrders();
+    } catch {
+      toast.error("Failed to update order status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
@@ -372,6 +400,14 @@ export function OrdersTable() {
                     <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Change Status"
+                          onClick={() => setStatusOrder(order)}
+                        >
+                          <RefreshCw className="size-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -631,6 +667,50 @@ export function OrdersTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Change Status Dialog */}
+      <Dialog
+        open={!!statusOrder}
+        onOpenChange={(open) => !open && setStatusOrder(null)}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Change Order Status</DialogTitle>
+          </DialogHeader>
+          <form
+            id="change-status-form"
+            onSubmit={onStatusSubmit}
+            className="grid gap-4 py-4"
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="status-select">Status</Label>
+              <Select
+                name="status"
+                defaultValue={statusOrder?.status || "pending"}
+              >
+                <SelectTrigger id="status-select">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </form>
+          <DialogFooter>
+            <Button
+              type="submit"
+              form="change-status-form"
+              disabled={isUpdatingStatus}
+            >
+              {isUpdatingStatus ? "Updating..." : "Update Status"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
