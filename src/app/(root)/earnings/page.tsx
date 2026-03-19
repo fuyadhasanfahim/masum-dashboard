@@ -1,9 +1,10 @@
-import { createMetadata } from '@/lib/metadata';
+import { EarningsPageContent } from "@/components/root/earnings/earnings-page-content";
+import { createMetadata } from "@/lib/metadata";
 
 export async function generateMetadata() {
-    return createMetadata('Earnings');
+    return createMetadata("Earnings");
 }
 
 export default function EarningsPage() {
-    return <div>Earnings</div>;
+    return <EarningsPageContent />;
 }
