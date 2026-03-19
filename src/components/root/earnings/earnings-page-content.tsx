@@ -45,6 +45,10 @@ import {
   FileText,
   Pencil,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 
 const InvoiceDialog = dynamic(
@@ -86,6 +90,17 @@ interface InvoiceOrder {
 export function EarningsPageContent() {
   const [earnings, setEarnings] = useState<IEarningAggregated[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  
+  const pageCount = Math.max(1, Math.ceil(earnings.length / pageSize));
+  const paginatedData = earnings.slice(
+      pageIndex * pageSize,
+      pageIndex * pageSize + pageSize
+  );
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = pageIndex < pageCount - 1;
 
   // Edit
   const [editEarning, setEditEarning] = useState<IEarningAggregated | null>(null);
@@ -105,7 +120,10 @@ export function EarningsPageContent() {
     try {
       const res = await fetch("/api/earnings/get-earnings");
       const data = await res.json();
-      if (data.success) setEarnings(data.data);
+      if (data.success) {
+        setEarnings(data.data);
+        setPageIndex(0);
+      }
     } catch {
       toast.error("Failed to load earnings");
     } finally {
@@ -228,9 +246,9 @@ export function EarningsPageContent() {
         <h1 className="text-2xl font-semibold tracking-tight">Earnings</h1>
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted sticky top-0 z-10">
             <TableRow>
               <TableHead>Month</TableHead>
               <TableHead>Client</TableHead>
@@ -252,7 +270,7 @@ export function EarningsPageContent() {
                   ))}
                 </TableRow>
               ))
-            ) : earnings.length === 0 ? (
+            ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -262,7 +280,7 @@ export function EarningsPageContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              earnings.map((earning) => {
+              paginatedData.map((earning) => {
                 const currency = getCurrency(earning);
                 return (
                   <TableRow key={earning._id}>
@@ -315,6 +333,83 @@ export function EarningsPageContent() {
           </TableBody>
         </Table>
       </div>
+
+      {earnings.length > 0 && (
+        <div className="flex items-center justify-between px-4">
+          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+            {earnings.length} earning record(s)
+          </div>
+          <div className="flex w-full items-center gap-8 lg:w-fit">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                Rows per page
+              </Label>
+              <Select
+                value={`${pageSize}`}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setPageIndex(0);
+                }}
+              >
+                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-fit items-center justify-center text-sm font-medium">
+              Page {pageIndex + 1} of {pageCount}
+            </div>
+            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+              <Button
+                variant="outline"
+                className="hidden h-8 w-8 p-0 lg:flex"
+                onClick={() => setPageIndex(0)}
+                disabled={!canPreviousPage}
+              >
+                <span className="sr-only">Go to first page</span>
+                <ChevronsLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setPageIndex((i) => i - 1)}
+                disabled={!canPreviousPage}
+              >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setPageIndex((i) => i + 1)}
+                disabled={!canNextPage}
+              >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight />
+              </Button>
+              <Button
+                variant="outline"
+                className="hidden size-8 lg:flex"
+                size="icon"
+                onClick={() => setPageIndex(pageCount - 1)}
+                disabled={!canNextPage}
+              >
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Invoice Dialog */}
       <InvoiceDialog

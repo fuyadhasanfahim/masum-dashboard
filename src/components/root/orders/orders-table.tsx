@@ -49,6 +49,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Search,
   ImageIcon,
   ExternalLink,
@@ -283,9 +285,9 @@ export function OrdersTable() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted sticky top-0 z-10">
             <TableRow>
               <TableHead>Title</TableHead>
               <TableHead>Client</TableHead>
@@ -394,31 +396,78 @@ export function OrdersTable() {
         </Table>
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing {orders.length} of {pagination.total} orders
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page <= 1}
-              onClick={() => setParams({ page: pagination.page - 1 })}
-            >
-              <ChevronLeft />
-            </Button>
-            <span className="text-sm">
+      {pagination && pagination.total > 0 && (
+        <div className="flex items-center justify-between px-4">
+          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+            {pagination.total} order(s)
+          </div>
+          <div className="flex w-full items-center gap-8 lg:w-fit">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                Rows per page
+              </Label>
+              <Select
+                value={`${params.perPage || 10}`}
+                onValueChange={(value) => {
+                  setParams({ perPage: Number(value), page: 1 });
+                }}
+              >
+                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {pagination.page} of {pagination.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() => setParams({ page: pagination.page + 1 })}
-            >
-              <ChevronRight />
-            </Button>
+            </div>
+            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+              <Button
+                variant="outline"
+                className="hidden h-8 w-8 p-0 lg:flex"
+                onClick={() => setParams({ page: 1 })}
+                disabled={pagination.page <= 1}
+              >
+                <span className="sr-only">Go to first page</span>
+                <ChevronsLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setParams({ page: pagination.page - 1 })}
+                disabled={pagination.page <= 1}
+              >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setParams({ page: pagination.page + 1 })}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight />
+              </Button>
+              <Button
+                variant="outline"
+                className="hidden size-8 lg:flex"
+                size="icon"
+                onClick={() => setParams({ page: pagination.totalPages })}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight />
+              </Button>
+            </div>
           </div>
         </div>
       )}

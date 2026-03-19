@@ -4,7 +4,14 @@ import {
     Text,
     View,
     StyleSheet,
+    Font,
 } from '@react-pdf/renderer';
+
+
+Font.register({ family: 'Inter', src: 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.ttf' });
+Font.register({ family: 'Inter-Bold', src: 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.ttf' });
+Font.register({ family: 'JetBrains Mono', src: 'https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-400-normal.ttf' });
+Font.register({ family: 'JetBrains Mono-Bold', src: 'https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin-700-normal.ttf' });
 
 const PRIMARY_COLOR = '#ea580c'; // Matches the app's default vibrant orange primary color
 const TEXT_MAIN = '#1f2937';
@@ -18,7 +25,7 @@ const styles = StyleSheet.create({
         paddingTop: 40,
         paddingBottom: 60,
         paddingHorizontal: 40,
-        fontFamily: 'Helvetica',
+        fontFamily: 'Inter',
         fontSize: 10,
         color: TEXT_MAIN,
         backgroundColor: '#ffffff',
@@ -38,7 +45,7 @@ const styles = StyleSheet.create({
     },
     companyName: {
         fontSize: 28,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         color: PRIMARY_COLOR,
         letterSpacing: -0.5,
         marginBottom: 4,
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
     },
     invoiceTitle: {
         fontSize: 24,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         letterSpacing: 4,
         color: TEXT_MAIN,
         marginBottom: 10,
@@ -62,21 +69,22 @@ const styles = StyleSheet.create({
     metaRow: {
         flexDirection: 'row',
         marginBottom: 4,
+        alignItems: 'center',
     },
     metaLabel: {
-        fontSize: 9,
+        fontSize: 10,
         color: TEXT_MUTED,
-        width: 80,
+        width: 90,
         textAlign: 'right',
         paddingRight: 10,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
     },
     metaValue: {
         fontSize: 10,
         color: TEXT_MAIN,
-        width: 100,
+        width: 90,
         textAlign: 'right',
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'JetBrains Mono-Bold',
     },
     // Bill To Section
     billToSection: {
@@ -92,12 +100,12 @@ const styles = StyleSheet.create({
         color: TEXT_MUTED,
         textTransform: 'uppercase',
         letterSpacing: 1,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         marginBottom: 8,
     },
     clientName: {
         fontSize: 14,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         color: TEXT_MAIN,
         marginBottom: 4,
     },
@@ -120,7 +128,7 @@ const styles = StyleSheet.create({
     thText: {
         color: '#ffffff',
         fontSize: 9,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         textTransform: 'uppercase',
         letterSpacing: 1,
     },
@@ -141,10 +149,11 @@ const styles = StyleSheet.create({
     tdText: {
         fontSize: 10,
         color: TEXT_MAIN,
+        fontFamily: 'JetBrains Mono',
     },
     tdTextBold: {
         fontSize: 10,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'JetBrains Mono-Bold',
         color: TEXT_MAIN,
     },
     // Summary Section
@@ -167,12 +176,12 @@ const styles = StyleSheet.create({
     summaryLabel: {
         fontSize: 10,
         color: TEXT_MUTED,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
     },
     summaryValue: {
         fontSize: 10,
         color: TEXT_MAIN,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
     },
     totalRow: {
         flexDirection: 'row',
@@ -186,12 +195,12 @@ const styles = StyleSheet.create({
     },
     totalLabel: {
         fontSize: 14,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         color: PRIMARY_COLOR,
     },
     totalValue: {
         fontSize: 16,
-        fontFamily: 'Helvetica-Bold',
+        fontFamily: 'Inter-Bold',
         color: PRIMARY_COLOR,
     },
     // Footer Section
@@ -258,7 +267,7 @@ export function InvoiceTemplate({
                     <View style={styles.companyBranding}>
                         <Text style={styles.companyName}>Masum Kamal</Text>
                         <Text style={styles.companyTagline}>
-                            Visual Craftsmanship
+                            Graphics Designer
                         </Text>
                     </View>
                     <View style={styles.invoiceMetaContainer}>
@@ -304,7 +313,7 @@ export function InvoiceTemplate({
                         <View
                             style={[
                                 styles.tableRow,
-                                i % 2 !== 0 && styles.tableRowEven,
+                                i % 2 !== 0 ? styles.tableRowEven : {},
                             ]}
                             key={i}
                         >

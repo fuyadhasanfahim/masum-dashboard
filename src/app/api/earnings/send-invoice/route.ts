@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import OrderModel from '@/models/order.model';
-import '@/models/service.model';
-import { dbConnect } from '@/lib/db';
 
 export async function POST(req: NextRequest) {
     try {
-        await dbConnect();
-
         const body = await req.json();
-        const { clientId, clientName, clientEmail, month, year, totalImages, totalPrice, currency, invoiceHtml } = body;
+        const {
+            clientName,
+            clientEmail,
+            month,
+            year,
+            totalImages,
+            totalPrice,
+            currency,
+            pdfBase64,
+            fileName,
+        } = body;
 
         if (!clientEmail) {
             return NextResponse.json(
@@ -18,63 +23,58 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Fetch the orders for this client+month
-        const start = new Date(year, month - 1, 1);
-        const end = new Date(year, month, 1);
+        if (!pdfBase64) {
+            return NextResponse.json(
+                { success: false, message: 'Invoice PDF is required' },
+                { status: 400 },
+            );
+        }
 
-        const orders = await OrderModel.find({
-            client: clientId,
-            createdAt: { $gte: start, $lt: end },
-        })
-            .populate('service')
-            .lean();
-
-        // Build invoice HTML for email body
         const monthName = new Date(year, month - 1).toLocaleString('en-US', {
             month: 'long',
         });
 
-        const orderRows = orders
-            .map(
-                (o) =>
-                    `<tr>
-                        <td style="padding:8px;border-bottom:1px solid #eee">${o.title || 'Untitled'}</td>
-                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${o.images || 0}</td>
-                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${currency}${(o.perImagePrice || 0).toFixed(2)}</td>
-                        <td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${currency}${(o.totalPrice || 0).toFixed(2)}</td>
-                    </tr>`,
-            )
-            .join('');
+        // Professional email body
+        const emailHtml = `
+            <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px 0">
+                <div style="background:#ea580c;padding:24px 32px;border-radius:8px 8px 0 0">
+                    <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700">Masum Kamal</h1>
+                    <p style="color:#fed7aa;margin:4px 0 0;font-size:13px;letter-spacing:0.5px">Graphics Designer</p>
+                </div>
 
-        const emailHtml = invoiceHtml || `
-            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-                <h2 style="color:#7c3aed">Invoice</h2>
-                <p><strong>Client:</strong> ${clientName}</p>
-                <p><strong>Period:</strong> ${monthName} ${year}</p>
-                <hr style="border:none;border-top:1px solid #eee;margin:16px 0"/>
-                <table style="width:100%;border-collapse:collapse">
-                    <thead>
-                        <tr style="background:#f9f9f9">
-                            <th style="padding:8px;text-align:left">Order</th>
-                            <th style="padding:8px;text-align:center">Images</th>
-                            <th style="padding:8px;text-align:right">Per Image</th>
-                            <th style="padding:8px;text-align:right">Total</th>
+                <div style="background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
+                    <p style="font-size:15px;color:#374151;margin:0 0 8px">Hello <strong>${clientName}</strong>,</p>
+                    <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6">
+                        Please find attached your invoice for <strong>${monthName} ${year}</strong>.
+                        Here is a quick summary of the billing details:
+                    </p>
+
+                    <table style="width:100%;border-collapse:collapse;margin:0 0 24px">
+                        <tr>
+                            <td style="padding:10px 16px;background:#f9fafb;border:1px solid #e5e7eb;color:#6b7280;font-size:13px;font-weight:600;width:50%">Period</td>
+                            <td style="padding:10px 16px;background:#f9fafb;border:1px solid #e5e7eb;color:#1f2937;font-size:13px;font-weight:700">${monthName} ${year}</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        ${orderRows}
-                    </tbody>
-                    <tfoot>
-                        <tr style="font-weight:bold;border-top:2px solid #7c3aed">
-                            <td style="padding:8px">Total</td>
-                            <td style="padding:8px;text-align:center">${totalImages}</td>
-                            <td style="padding:8px"></td>
-                            <td style="padding:8px;text-align:right">${currency}${totalPrice.toFixed(2)}</td>
+                        <tr>
+                            <td style="padding:10px 16px;border:1px solid #e5e7eb;color:#6b7280;font-size:13px;font-weight:600">Total Images</td>
+                            <td style="padding:10px 16px;border:1px solid #e5e7eb;color:#1f2937;font-size:13px;font-weight:700">${totalImages}</td>
                         </tr>
-                    </tfoot>
-                </table>
-                <hr style="border:none;border-top:1px solid #eee;margin:16px 0"/>
-                <p style="color:#666;font-size:12px">This invoice was generated automatically.</p>
+                        <tr>
+                            <td style="padding:10px 16px;background:#f9fafb;border:1px solid #e5e7eb;color:#6b7280;font-size:13px;font-weight:600">Total Amount</td>
+                            <td style="padding:10px 16px;background:#f9fafb;border:1px solid #e5e7eb;color:#ea580c;font-size:15px;font-weight:700">${currency}${Number(totalPrice).toFixed(2)}</td>
+                        </tr>
+                    </table>
+
+                    <p style="font-size:14px;color:#6b7280;margin:0 0 8px;line-height:1.6">
+                        The detailed invoice is attached as a PDF to this email. If you have any questions regarding
+                        the invoice, please feel free to reply to this email.
+                    </p>
+
+                    <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+
+                    <p style="color:#9ca3af;font-size:12px;margin:0;text-align:center">
+                        This invoice was generated automatically. Thank you for your business.
+                    </p>
+                </div>
             </div>
         `;
 
@@ -91,8 +91,15 @@ export async function POST(req: NextRequest) {
         await transporter.sendMail({
             from: process.env.SMTP_FROM || process.env.SMTP_USER,
             to: clientEmail,
-            subject: `Invoice — ${monthName} ${year}`,
+            subject: `Invoice — ${monthName} ${year} | Masum Kamal`,
             html: emailHtml,
+            attachments: [
+                {
+                    filename: fileName || `Invoice-${monthName}-${year}.pdf`,
+                    content: Buffer.from(pdfBase64, 'base64'),
+                    contentType: 'application/pdf',
+                },
+            ],
         });
 
         return NextResponse.json({

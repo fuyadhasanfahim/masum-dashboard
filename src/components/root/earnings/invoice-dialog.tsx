@@ -75,14 +75,36 @@ export function InvoiceDialog({
 
     setIsSending(true);
     try {
+      // Generate the PDF on the client
+      const { pdf } = await import("@react-pdf/renderer");
+      const { InvoiceTemplate } = await import("./invoice-template");
+
+      const doc = (
+        <InvoiceTemplate
+          clientName={clientName}
+          clientEmail={clientEmail}
+          month={earning.month}
+          year={earning.year}
+          totalImages={earning.totalImages}
+          totalPrice={earning.totalPrice}
+          currency={currency}
+          orders={orders}
+        />
+      );
+
+      const blob = await pdf(doc).toBlob();
+      const arrayBuffer = await blob.arrayBuffer();
+      const pdfBase64 = btoa(
+        new Uint8Array(arrayBuffer).reduce(
+          (data, byte) => data + String.fromCharCode(byte),
+          ""
+        )
+      );
+
       const res = await fetch("/api/earnings/send-invoice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientId:
-            typeof earning.client === "object"
-              ? earning.client._id
-              : earning.client,
           clientName,
           clientEmail,
           month: earning.month,
@@ -90,6 +112,8 @@ export function InvoiceDialog({
           totalImages: earning.totalImages,
           totalPrice: earning.totalPrice,
           currency,
+          pdfBase64,
+          fileName,
         }),
       });
 

@@ -33,9 +33,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreateClientDialog } from "./create-client-dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 function formatDate(date: Date) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -56,6 +70,17 @@ interface EditFormValues {
 export function ClientsPageContent() {
   const [clients, setClients] = useState<IClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  
+  const pageCount = Math.max(1, Math.ceil(clients.length / pageSize));
+  const paginatedData = clients.slice(
+      pageIndex * pageSize,
+      pageIndex * pageSize + pageSize
+  );
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = pageIndex < pageCount - 1;
   const [editClient, setEditClient] = useState<IClient | null>(null);
   const [deleteClient, setDeleteClient] = useState<IClient | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -67,7 +92,10 @@ export function ClientsPageContent() {
     try {
       const res = await fetch("/api/clients/get-clients");
       const data = await res.json();
-      if (data.success) setClients(data.data);
+      if (data.success) {
+        setClients(data.data);
+        setPageIndex(0);
+      }
     } catch {
       // silent
     } finally {
@@ -141,9 +169,9 @@ export function ClientsPageContent() {
         <CreateClientDialog onCreated={fetchClients} />
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted sticky top-0 z-10">
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
@@ -165,7 +193,7 @@ export function ClientsPageContent() {
                   ))}
                 </TableRow>
               ))
-            ) : clients.length === 0 ? (
+            ) : paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
@@ -175,7 +203,7 @@ export function ClientsPageContent() {
                 </TableCell>
               </TableRow>
             ) : (
-              clients.map((client) => (
+              paginatedData.map((client) => (
                 <TableRow key={client._id}>
                   <TableCell className="font-medium">{client.name}</TableCell>
                   <TableCell>{client.email}</TableCell>
@@ -207,6 +235,83 @@ export function ClientsPageContent() {
           </TableBody>
         </Table>
       </div>
+
+      {clients.length > 0 && (
+        <div className="flex items-center justify-between px-4">
+          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+            {clients.length} client(s)
+          </div>
+          <div className="flex w-full items-center gap-8 lg:w-fit">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                Rows per page
+              </Label>
+              <Select
+                value={`${pageSize}`}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setPageIndex(0);
+                }}
+              >
+                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((size) => (
+                    <SelectItem key={size} value={`${size}`}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-fit items-center justify-center text-sm font-medium">
+              Page {pageIndex + 1} of {pageCount}
+            </div>
+            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+              <Button
+                variant="outline"
+                className="hidden h-8 w-8 p-0 lg:flex"
+                onClick={() => setPageIndex(0)}
+                disabled={!canPreviousPage}
+              >
+                <span className="sr-only">Go to first page</span>
+                <ChevronsLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setPageIndex((i) => i - 1)}
+                disabled={!canPreviousPage}
+              >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeft />
+              </Button>
+              <Button
+                variant="outline"
+                className="size-8"
+                size="icon"
+                onClick={() => setPageIndex((i) => i + 1)}
+                disabled={!canNextPage}
+              >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRight />
+              </Button>
+              <Button
+                variant="outline"
+                className="hidden size-8 lg:flex"
+                size="icon"
+                onClick={() => setPageIndex(pageCount - 1)}
+                disabled={!canNextPage}
+              >
+                <span className="sr-only">Go to last page</span>
+                <ChevronsRight />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog
