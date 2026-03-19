@@ -1,4 +1,4 @@
-import { getServerUser } from '@/actions/user';
+import { getServerUser } from '@/services/user';
 import { Metadata } from 'next';
 
 const user = await getServerUser();

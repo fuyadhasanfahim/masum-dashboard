@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
 const uri = process.env.MONGO_URI!;
 
@@ -10,11 +11,15 @@ declare global {
     var _mongoClient: MongoClient | undefined;
 }
 
-const client = globalThis._mongoClient ?? new MongoClient(uri);
+export const client = globalThis._mongoClient ?? new MongoClient(uri);
 
 if (process.env.NODE_ENV === 'development') {
     globalThis._mongoClient = client;
 }
 
-export { client };
 export const db = client.db();
+
+export async function dbConnect() {
+    await mongoose.connect(uri);
+    return mongoose;
+}
