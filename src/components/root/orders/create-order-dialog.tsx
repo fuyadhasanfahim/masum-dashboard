@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import useOrderStore from "@/store/order/order.store";
 import { IClient } from "@/types/client.type";
@@ -33,8 +33,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronDownIcon, Plus } from "lucide-react";
 
 interface FormValues {
   date: Date;
@@ -57,7 +56,7 @@ export function CreateOrderDialog() {
   >(null);
   const { createOrder, isCreating } = useOrderStore();
 
-    const { register, handleSubmit, reset, setValue, watch } =
+    const { register, handleSubmit, reset, setValue, control } =
     useForm<FormValues>({
       defaultValues: {
         date: new Date(),
@@ -72,13 +71,12 @@ export function CreateOrderDialog() {
       },
     });
 
-  const dateValue = watch("date");
-
-  const clientValue = watch("client");
-  const serviceValue = watch("service");
-  const imagesValue = watch("images");
-  const perImagePriceValue = watch("perImagePrice");
-  const totalPriceValue = watch("totalPrice");
+  const dateValue = useWatch({ control, name: "date" });
+  const clientValue = useWatch({ control, name: "client" });
+  const serviceValue = useWatch({ control, name: "service" });
+  const imagesValue = useWatch({ control, name: "images" });
+  const perImagePriceValue = useWatch({ control, name: "perImagePrice" });
+  const totalPriceValue = useWatch({ control, name: "totalPrice" });
 
   // Auto-calculate prices
   useEffect(() => {
@@ -179,18 +177,12 @@ export function CreateOrderDialog() {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !dateValue && "text-muted-foreground"
-                    )}
+                    variant="outline"
+                    data-empty={!dateValue}
+                    className="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateValue ? (
-                      format(dateValue, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
+                    <ChevronDownIcon />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -198,7 +190,7 @@ export function CreateOrderDialog() {
                     mode="single"
                     selected={dateValue}
                     onSelect={(date) => date && setValue("date", date)}
-                    initialFocus
+                    defaultMonth={dateValue}
                   />
                 </PopoverContent>
               </Popover>

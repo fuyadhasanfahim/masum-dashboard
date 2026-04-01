@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import useOrderStore from "@/store/order/order.store";
 import { IClient } from "@/types/client.type";
@@ -58,7 +58,15 @@ import {
   Pencil,
   Trash2,
   RefreshCw,
+  ChevronDownIcon,
 } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const statusVariants: Record<
   IOrder["status"],
@@ -130,7 +138,7 @@ interface EditFormValues {
   client: string;
   service: string;
   status: string;
-  date: string;
+  date: Date;
 }
 
 export function OrdersTable() {
@@ -148,15 +156,16 @@ export function OrdersTable() {
     "perImage" | "total" | null
   >(null);
 
-  const { register, handleSubmit, reset, setValue, watch } =
+  const { register, handleSubmit, reset, setValue, control } =
     useForm<EditFormValues>();
 
-  const editClientValue = watch("client");
-  const editServiceValue = watch("service");
-  const editStatusValue = watch("status");
-  const editImagesValue = watch("images");
-  const editPerImagePrice = watch("perImagePrice");
-  const editTotalPrice = watch("totalPrice");
+  const editClientValue = useWatch({ control, name: "client" });
+  const editServiceValue = useWatch({ control, name: "service" });
+  const editStatusValue = useWatch({ control, name: "status" });
+  const editImagesValue = useWatch({ control, name: "images" });
+  const editPerImagePrice = useWatch({ control, name: "perImagePrice" });
+  const editTotalPrice = useWatch({ control, name: "totalPrice" });
+  const editDateValue = useWatch({ control, name: "date" });
 
   // Auto-calculate prices in edit form
   useEffect(() => {
@@ -216,7 +225,7 @@ export function OrdersTable() {
       client: getClientId(editOrder.client),
       service: getServiceId(editOrder.service),
       status: editOrder.status,
-      date: editOrder.createdAt ? new Date(editOrder.createdAt).toISOString().split('T')[0] : "",
+      date: editOrder.createdAt ? new Date(editOrder.createdAt) : new Date(),
     });
     setLastPriceEdited(null);
   }, [editOrder, reset]);
@@ -247,7 +256,7 @@ export function OrdersTable() {
           client: data.client || undefined,
           service: data.service || undefined,
           status: data.status,
-          createdAt: data.date ? new Date(data.date).toISOString() : undefined,
+          createdAt: data.date ? data.date.toISOString() : undefined,
         }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -527,6 +536,34 @@ export function OrdersTable() {
               className="grid gap-4 pr-4"
             >
               <div className="grid gap-2">
+                <Label>Order Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      data-empty={!editDateValue}
+                      className="w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground"
+                    >
+                      {editDateValue ? (
+                        format(editDateValue, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <ChevronDownIcon />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={editDateValue}
+                      onSelect={(date) => date && setValue("date", date)}
+                      defaultMonth={editDateValue}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="grid gap-2">
                 <Label htmlFor="edit-title">Title</Label>
                 <Input id="edit-title" {...register("title")} />
               </div>
@@ -635,15 +672,6 @@ export function OrdersTable() {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-date">Order Date</Label>
-                <Input
-                  id="edit-date"
-                  type="date"
-                  {...register("date")}
-                />
               </div>
             </form>
           </ScrollArea>
