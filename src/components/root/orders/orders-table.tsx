@@ -157,7 +157,20 @@ export function OrdersTable() {
   >(null);
 
   const { register, handleSubmit, reset, setValue, control } =
-    useForm<EditFormValues>();
+    useForm<EditFormValues>({
+      defaultValues: {
+        title: "",
+        images: "",
+        downloadLink: "",
+        localFileLocation: "",
+        perImagePrice: "",
+        totalPrice: "",
+        client: "",
+        service: "",
+        status: "pending",
+        date: new Date(),
+      },
+    });
 
   const editClientValue = useWatch({ control, name: "client" });
   const editServiceValue = useWatch({ control, name: "service" });
@@ -225,7 +238,11 @@ export function OrdersTable() {
       client: getClientId(editOrder.client),
       service: getServiceId(editOrder.service),
       status: editOrder.status,
-      date: editOrder.createdAt ? new Date(editOrder.createdAt) : new Date(),
+      date: editOrder.date
+        ? new Date(editOrder.date)
+        : editOrder.createdAt
+        ? new Date(editOrder.createdAt)
+        : new Date(),
     });
     setLastPriceEdited(null);
   }, [editOrder, reset]);
@@ -256,7 +273,7 @@ export function OrdersTable() {
           client: data.client || undefined,
           service: data.service || undefined,
           status: data.status,
-          createdAt: data.date ? data.date.toISOString() : undefined,
+          date: data.date ? data.date.toISOString() : undefined,
         }),
       });
       if (!res.ok) throw new Error("Failed to update");
