@@ -67,6 +67,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import Link from "next/link";
 
 const statusVariants: Record<
   IOrder["status"],
@@ -241,8 +242,8 @@ export function OrdersTable() {
       date: editOrder.date
         ? new Date(editOrder.date)
         : editOrder.createdAt
-        ? new Date(editOrder.createdAt)
-        : new Date(),
+          ? new Date(editOrder.createdAt)
+          : new Date(),
     });
     setLastPriceEdited(null);
   }, [editOrder, reset]);
@@ -292,7 +293,7 @@ export function OrdersTable() {
     try {
       const res = await fetch(
         `/api/orders/delete-order?id=${deleteOrder._id}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
       if (!res.ok) throw new Error("Failed to delete");
       toast.success("Order deleted");
@@ -306,10 +307,10 @@ export function OrdersTable() {
   const onStatusSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!statusOrder) return;
-    
+
     const formData = new FormData(e.currentTarget);
     const newStatus = formData.get("status") as string;
-    
+
     setIsUpdatingStatus(true);
     try {
       const res = await fetch("/api/orders/update-order", {
@@ -346,6 +347,7 @@ export function OrdersTable() {
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
             <TableRow>
+              <TableHead>Order Date</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Client</TableHead>
               <TableHead>Service</TableHead>
@@ -354,7 +356,6 @@ export function OrdersTable() {
               <TableHead>Total</TableHead>
               <TableHead>Links</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
               <TableHead className="w-24">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -383,6 +384,9 @@ export function OrdersTable() {
                 const currency = getClientCurrency(order.client);
                 return (
                   <TableRow key={order._id}>
+                    <TableCell>
+                      {order.date ? formatDate(order.date) : "—"}
+                    </TableCell>
                     <TableCell className="font-medium">
                       {order.title || "—"}
                     </TableCell>
@@ -399,21 +403,21 @@ export function OrdersTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {formatCurrency(order.perImagePrice, currency)}
+                      {formatCurrency(order.perImagePrice, currency) || "—"}
                     </TableCell>
                     <TableCell>
-                      {formatCurrency(order.totalPrice, currency)}
+                      {formatCurrency(order.totalPrice, currency) || "—"}
                     </TableCell>
                     <TableCell>
                       <span className="flex items-center gap-2">
                         {order.downloadLink && (
-                          <a
+                          <Link
                             href={order.downloadLink}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
                             <ExternalLink className="size-4" />
-                          </a>
+                          </Link>
                         )}
                         {order.localFileLocation && (
                           <FolderOpen className="size-4 text-muted-foreground" />
@@ -426,7 +430,6 @@ export function OrdersTable() {
                         {statusLabels[order.status]}
                       </Badge>
                     </TableCell>
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Button
@@ -640,10 +643,7 @@ export function OrdersTable() {
 
               <div className="grid gap-2">
                 <Label htmlFor="edit-localFile">Local File Location</Label>
-                <Input
-                  id="edit-localFile"
-                  {...register("localFileLocation")}
-                />
+                <Input id="edit-localFile" {...register("localFileLocation")} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -693,11 +693,7 @@ export function OrdersTable() {
             </form>
           </ScrollArea>
           <DialogFooter>
-            <Button
-              type="submit"
-              form="edit-order-form"
-              disabled={isSaving}
-            >
+            <Button type="submit" form="edit-order-form" disabled={isSaving}>
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
