@@ -26,9 +26,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FormValues {
+  date: Date;
   title: string;
   images: string;
   downloadLink: string;
@@ -48,9 +57,10 @@ export function CreateOrderDialog() {
   >(null);
   const { createOrder, isCreating } = useOrderStore();
 
-  const { register, handleSubmit, reset, setValue, watch } =
+    const { register, handleSubmit, reset, setValue, watch } =
     useForm<FormValues>({
       defaultValues: {
+        date: new Date(),
         title: "",
         images: "",
         downloadLink: "",
@@ -61,6 +71,8 @@ export function CreateOrderDialog() {
         service: "",
       },
     });
+
+  const dateValue = watch("date");
 
   const clientValue = watch("client");
   const serviceValue = watch("service");
@@ -117,6 +129,7 @@ export function CreateOrderDialog() {
 
   const onSubmit = async (data: FormValues) => {
     const payload = {
+      date: data.date,
       title: data.title || undefined,
       images: data.images ? Number(data.images) : undefined,
       downloadLink: data.downloadLink || undefined,
@@ -161,6 +174,36 @@ export function CreateOrderDialog() {
             onSubmit={handleSubmit(onSubmit)}
             className="grid gap-4 pr-4"
           >
+            <div className="grid gap-2">
+              <Label>Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateValue && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateValue ? (
+                      format(dateValue, "PPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateValue}
+                    onSelect={(date) => date && setValue("date", date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input

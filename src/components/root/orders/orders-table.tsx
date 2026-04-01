@@ -130,6 +130,7 @@ interface EditFormValues {
   client: string;
   service: string;
   status: string;
+  date: string;
 }
 
 export function OrdersTable() {
@@ -215,6 +216,7 @@ export function OrdersTable() {
       client: getClientId(editOrder.client),
       service: getServiceId(editOrder.service),
       status: editOrder.status,
+      date: editOrder.createdAt ? new Date(editOrder.createdAt).toISOString().split('T')[0] : "",
     });
     setLastPriceEdited(null);
   }, [editOrder, reset]);
@@ -245,6 +247,7 @@ export function OrdersTable() {
           client: data.client || undefined,
           service: data.service || undefined,
           status: data.status,
+          createdAt: data.date ? new Date(data.date).toISOString() : undefined,
         }),
       });
       if (!res.ok) throw new Error("Failed to update");
@@ -632,6 +635,15 @@ export function OrdersTable() {
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="edit-date">Order Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  {...register("date")}
+                />
               </div>
             </form>
           </ScrollArea>

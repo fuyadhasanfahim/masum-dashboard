@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ClientModel from '@/models/client.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function DELETE(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
 
         const { searchParams } = req.nextUrl;
@@ -16,7 +20,13 @@ export async function DELETE(req: NextRequest) {
             );
         }
 
-        const client = await ClientModel.findByIdAndDelete(id);
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
+
+        // Filter by user if not admin
+        const queryFilter = isAdmin ? { _id: id } : { _id: id, user: userId };
+
+        const client = await ClientModel.findOneAndDelete(queryFilter);
 
         if (!client) {
             return NextResponse.json(

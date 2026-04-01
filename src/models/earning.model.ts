@@ -3,6 +3,11 @@ import { model, models, Schema } from 'mongoose';
 
 const earningSchema = new Schema<IEarning>(
     {
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
         client: {
             type: Schema.Types.ObjectId,
             ref: 'Client',

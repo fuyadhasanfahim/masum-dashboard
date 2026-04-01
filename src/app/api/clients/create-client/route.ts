@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ClientModel from '@/models/client.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function POST(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
 
         const body = await req.json();
@@ -16,6 +20,7 @@ export async function POST(req: NextRequest) {
         }
 
         const client = await ClientModel.create({
+            user: session.user.id,
             name: body.name,
             email: body.email,
             phone: body.phone || undefined,

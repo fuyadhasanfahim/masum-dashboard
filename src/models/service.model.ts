@@ -3,6 +3,11 @@ import { model, models, Schema } from 'mongoose';
 
 const serviceSchema = new Schema<IService>(
     {
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
         name: {
             type: String,
             required: true,

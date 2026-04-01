@@ -42,6 +42,10 @@ const orderSchema = new Schema<IOrder>(
             enum: ['pending', 'in_progress', 'completed', 'cancelled'],
             default: 'pending',
         },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
     },
     {
         timestamps: true,

@@ -1,5 +1,10 @@
+import { User } from 'better-auth';
+
+type Ref<T> = string | T;
+
 export interface IClient {
     _id: string;
+    user: Ref<User>;
     name: string;
     email: string;
     phone?: string;

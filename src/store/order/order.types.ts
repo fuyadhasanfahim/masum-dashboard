@@ -22,6 +22,7 @@ export interface CreateOrderData {
     totalPrice?: number;
     client?: string;
     service?: string;
+    date?: string | Date;
 }
 
 export interface OrderState {

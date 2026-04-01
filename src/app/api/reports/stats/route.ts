@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
 import OrderModel from '@/models/order.model';
-import ClientModel from '@/models/client.model';
 import '@/models/service.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function GET() {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
+
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
+
+        // Filter by user if not admin
+        const queryFilter = isAdmin ? {} : { user: userId };
 
         const now = new Date();
         const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
@@ -18,7 +27,7 @@ export async function GET() {
         ] = await Promise.all([
             // 1. Monthly Revenue (Last 12 Months)
             OrderModel.aggregate([
-                { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+                { $match: { createdAt: { $gte: twelveMonthsAgo }, ...queryFilter } },
                 {
                     $group: {
                         _id: {
@@ -34,7 +43,7 @@ export async function GET() {
 
             // 2. Top Clients by Revenue
             OrderModel.aggregate([
-                { $match: { client: { $exists: true, $ne: null } } },
+                { $match: { client: { $exists: true, $ne: null }, ...queryFilter } },
                 {
                     $group: {
                         _id: '$client',
@@ -64,6 +73,7 @@ export async function GET() {
 
             // 3. Order Status Breakdown
             OrderModel.aggregate([
+                { $match: queryFilter },
                 {
                     $group: {
                         _id: '$status',
@@ -83,7 +93,7 @@ export async function GET() {
 
         for (let i = 0; i < 12; i++) {
             const found = monthlyRevenueAgg.find(
-                (m: any) => m._id.year === currentYear && m._id.month === currentMonth
+                (m) => m._id.year === currentYear && m._id.month === currentMonth
             );
 
             monthlyRevenue.push({
@@ -100,7 +110,7 @@ export async function GET() {
         }
 
         // Format Order Status
-        const orderStatus = orderStatusAgg.map((s: any) => ({
+        const orderStatus = orderStatusAgg.map((s) => ({
             status: s._id,
             count: s.count,
         }));

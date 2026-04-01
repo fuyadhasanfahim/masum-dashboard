@@ -3,10 +3,18 @@ import OrderModel from '@/models/order.model';
 import EarningModel from '@/models/earning.model';
 import { dbConnect } from '@/lib/db';
 import mongoose from 'mongoose';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function GET(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
+
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
+        const queryFilter = isAdmin ? {} : { user: userId };
 
         const { searchParams } = req.nextUrl;
         const month = searchParams.get('month')
@@ -16,7 +24,7 @@ export async function GET(req: NextRequest) {
             ? parseInt(searchParams.get('year')!)
             : undefined;
 
-        const matchStage: Record<string, unknown> = {};
+        const matchStage: Record<string, unknown> = { ...queryFilter };
         if (month && year) {
             const start = new Date(year, month - 1, 1);
             const end = new Date(year, month, 1);
@@ -75,7 +83,7 @@ export async function GET(req: NextRequest) {
         const aggregated = await OrderModel.aggregate(pipeline);
 
         // Fetch earning statuses for all client+month+year combos
-        const earningStatuses = await EarningModel.find().lean();
+        const earningStatuses = await EarningModel.find(queryFilter).lean();
         const statusMap = new Map<string, string>();
         for (const e of earningStatuses) {
             const key = `${e.client}-${e.month}-${e.year}`;

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import EarningModel from '@/models/earning.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function PUT(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
 
         const body = await req.json();
@@ -16,10 +20,18 @@ export async function PUT(req: NextRequest) {
             );
         }
 
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
+
+        // Filter by user if not admin
+        const queryFilter = isAdmin 
+            ? { client: clientId, month, year } 
+            : { client: clientId, month, year, user: userId };
+
         const earning = await EarningModel.findOneAndUpdate(
-            { client: clientId, month, year },
-            { status },
-            { upsert: true, returnDocument: 'after' },
+            queryFilter,
+            { status, user: userId },
+            { upsert: true, new: true },
         ).lean();
 
         return NextResponse.json({ success: true, data: earning });

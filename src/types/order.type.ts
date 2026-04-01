@@ -20,7 +20,7 @@ export interface IOrder {
     totalPrice?: number;
 
     status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-
+    date?: Date;
     createdAt: Date;
     updatedAt: Date;
 }

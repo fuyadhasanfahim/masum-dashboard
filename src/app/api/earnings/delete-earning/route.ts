@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 import EarningModel from '@/models/earning.model';
 import OrderModel from '@/models/order.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function DELETE(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
+
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
+        const userFilter = isAdmin ? {} : { user: userId };
 
         const { searchParams } = req.nextUrl;
         const clientId = searchParams.get('clientId');
@@ -29,12 +37,14 @@ export async function DELETE(req: NextRequest) {
             client: clientId,
             month: m,
             year: y,
+            ...userFilter,
         });
 
         // Delete all associated orders
         await OrderModel.deleteMany({
             client: clientId,
             createdAt: { $gte: start, $lt: end },
+            ...userFilter,
         });
 
         return NextResponse.json({ success: true, message: 'Earning and associated orders deleted' });

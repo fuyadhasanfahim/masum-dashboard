@@ -3,10 +3,17 @@ import OrderModel from '@/models/order.model';
 import '@/models/client.model';
 import '@/models/service.model';
 import { dbConnect } from '@/lib/db';
+import { getRequiredSession } from '@/lib/auth-helper';
 
 export async function GET(req: NextRequest) {
     try {
+        const { session, response } = await getRequiredSession();
+        if (response) return response;
+
         await dbConnect();
+
+        const userId = session.user.id;
+        const isAdmin = session.user.role === 'admin';
 
         const { searchParams } = req.nextUrl;
 
@@ -19,7 +26,7 @@ export async function GET(req: NextRequest) {
         const endDate = searchParams.get('endDate');
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const filter: Record<string, any> = {};
+        const filter: Record<string, any> = isAdmin ? {} : { user: userId };
 
         if (search) {
             filter.$or = [{ title: { $regex: search, $options: 'i' } }];
