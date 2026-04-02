@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -165,6 +166,9 @@ export function CreateOrderDialog() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Order</DialogTitle>
+          <DialogDescription>
+            Enter the details for the new order below.
+          </DialogDescription>
         </DialogHeader>
         <ScrollArea className="max-h-[60vh]">
           <form

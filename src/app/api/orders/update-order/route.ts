@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OrderModel from '@/models/order.model';
+import '@/models/client.model';
+import '@/models/service.model';
 import { dbConnect } from '@/lib/db';
 import { getRequiredSession } from '@/lib/auth-helper';
 

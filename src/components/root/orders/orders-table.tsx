@@ -19,6 +19,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -548,6 +549,9 @@ export function OrdersTable() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Order</DialogTitle>
+            <DialogDescription>
+              Make changes to the order details. Click save to apply.
+            </DialogDescription>
           </DialogHeader>
           <ScrollArea className="max-h-[60vh]">
             <form
@@ -729,6 +733,9 @@ export function OrdersTable() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Change Order Status</DialogTitle>
+            <DialogDescription>
+              Select a new status for this order.
+            </DialogDescription>
           </DialogHeader>
           <form
             id="change-status-form"
