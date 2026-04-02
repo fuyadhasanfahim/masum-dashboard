@@ -43,7 +43,7 @@ export async function DELETE(req: NextRequest) {
         // Delete all associated orders
         await OrderModel.deleteMany({
             client: clientId,
-            createdAt: { $gte: start, $lt: end },
+            date: { $gte: start, $lt: end },
             ...userFilter,
         });
 

@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
         const userId = session.user.id;
         const isAdmin = session.user.role === 'admin';
-        const queryFilter = isAdmin ? {} : { user: userId };
+        const queryFilter = isAdmin ? {} : { user: new mongoose.Types.ObjectId(userId) };
 
         const { searchParams } = req.nextUrl;
         const month = searchParams.get('month')
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
         if (month && year) {
             const start = new Date(year, month - 1, 1);
             const end = new Date(year, month, 1);
-            matchStage.createdAt = { $gte: start, $lt: end };
+            matchStage.date = { $gte: start, $lt: end };
         }
 
         const pipeline: mongoose.PipelineStage[] = [
@@ -39,8 +39,8 @@ export async function GET(req: NextRequest) {
                 $group: {
                     _id: {
                         client: '$client',
-                        month: { $month: '$createdAt' },
-                        year: { $year: '$createdAt' },
+                        month: { $month: '$date' },
+                        year: { $year: '$date' },
                     },
                     totalImages: { $sum: { $ifNull: ['$images', 0] } },
                     totalPrice: { $sum: { $ifNull: ['$totalPrice', 0] } },

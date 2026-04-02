@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             client: body.client || undefined,
             service: body.service || undefined,
             title: body.title || undefined,
-            images: body.images || [],
+            images: Number(body.images) || 0,
             downloadLink: body.downloadLink || undefined,
             localFileLocation: body.localFileLocation || undefined,
             perImagePrice: body.perImagePrice || undefined,

@@ -37,9 +37,9 @@ export async function GET(req: NextRequest) {
         }
 
         if (startDate || endDate) {
-            filter.createdAt = {};
-            if (startDate) filter.createdAt.$gte = new Date(startDate);
-            if (endDate) filter.createdAt.$lt = new Date(endDate);
+            filter.date = {};
+            if (startDate) filter.date.$gte = new Date(startDate);
+            if (endDate) filter.date.$lt = new Date(endDate);
         }
 
         const [orders, total] = await Promise.all([
